@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>American Accent Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #1D9E75;
+  --green-light: #E1F5EE;
+  --green-dark: #085041;
+  --green-mid: #0F6E56;
+  --amber: #EF9F27;
+  --amber-light: #FAEEDA;
+  --amber-dark: #412402;
+  --coral: #D85A30;
+  --coral-light: #FAECE7;
+  --blue: #378ADD;
+  --blue-light: #E6F1FB;
+  --blue-dark: #0C447C;
+  --gray-50: #F1EFE8;
+  --gray-100: #D3D1C7;
+  --gray-400: #888780;
+  --gray-600: #5F5E5A;
+  --gray-900: #2C2C2A;
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --border: rgba(0,0,0,0.08);
+  --text: #1a1a18;
+  --text-2: #5F5E5A;
+  --text-3: #888780;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --nav-h: 68px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  overflow: hidden;
+}
+
+.app-shell {
+  max-width: 430px;
+  margin: 0 auto;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- SCREENS ---- */
+.screen {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav-h) + 16px);
+}
+.screen.active { display: block; }
+
+/* ---- ONBOARDING ---- */
+#screen-onboard {
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 28px;
+  background: var(--surface);
+}
+.onboard-icon {
+  width: 72px; height: 72px;
+  background: var(--green-light);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 28px;
+}
+.onboard-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px; line-height: 1.2;
+  color: var(--text); margin-bottom: 10px;
+}
+.onboard-sub { font-size: 15px; color: var(--text-2); line-height: 1.6; margin-bottom: 36px; }
+
+.api-section { margin-bottom: 24px; }
+.api-label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+.api-input-wrap { position: relative; }
+.api-input {
+  width: 100%; padding: 14px 44px 14px 16px;
+  background: var(--gray-50);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.api-input:focus { border-color: var(--green); background: var(--surface); }
+.api-toggle {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 13px;
+}
+.api-hint { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+.api-hint a { color: var(--blue); text-decoration: none; }
+
+.start-btn {
+  width: 100%; padding: 16px;
+  background: var(--green); color: white;
+  border: none; border-radius: var(--radius);
+  font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.start-btn:active { opacity: 0.85; }
+.start-btn:disabled { background: var(--gray-100); color: var(--gray-400); cursor: not-allowed; }
+
+/* ---- TOP BAR ---- */
+.top-bar {
+  padding: 20px 20px 14px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.top-bar-row { display: flex; align-items: center; justify-content: space-between; }
+.top-bar h1 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); }
+.top-bar .sub { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.streak-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--amber-light); padding: 6px 12px;
+  border-radius: 20px; font-size: 13px; font-weight: 600;
+  color: var(--amber-dark);
+}
+
+/* ---- HOME ---- */
+.home-hero {
+  margin: 4px 20px 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.hero-header {
+  background: var(--green);
+  padding: 18px 20px 14px;
+}
+.hero-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 4px; }
+.hero-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: white; }
+.hero-subtitle { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 3px; }
+.hero-body { padding: 16px 20px; }
+.prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.prog-track { flex: 1; height: 7px; background: var(--gray-50); border-radius: 4px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+.prog-text { font-size: 13px; color: var(--text-2); min-width: 30px; text-align: right; font-weight: 500; }
+.go-btn {
+  width: 100%; padding: 13px;
+  background: var(--green); color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.go-btn:active { opacity: 0.85; }
+
+.section-hd { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: 0.07em; text-transform: uppercase; padding: 0 20px; margin-bottom: 10px; }
+
+.week-strip { padding: 0 20px; display: flex; gap: 6px; margin-bottom: 20px; }
+.week-cell {
+  flex: 1; aspect-ratio: 1;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--text-3); gap: 2px;
+}
+.week-cell .dn { font-size: 14px; font-weight: 600; }
+.week-cell.done { background: var(--green); border-color: var(--green); color: white; }
+.week-cell.today { border-color: var(--green); color: var(--green); }
+.week-cell.today .dn { color: var(--green); }
+
+.reminder-row {
+  margin: 0 20px 20px;
+  padding: 14px 16px;
+  background: var(--amber-light);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.reminder-info p:first-child { font-size: 14px; font-weight: 500; color: var(--amber-dark); }
+.reminder-info p:last-child { font-size: 12px; color: #633806; margin-top: 1px; }
+.reminder-edit-btn {
+  font-size: 12px; color: #854F0B;
+  background: white; border: 1px solid var(--amber);
+  padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; font-family: 'DM Sans', sans-serif;
+}
+
+/* ---- PRACTICE ---- */
+.practice-nav {
+  padding: 14px 20px 0;
+  display: flex; align-items: center; gap: 10px;
+}
+.back-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; color: var(--green); font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; gap: 4px;
+}
+.prac-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); margin-left: auto; }
+
+.tip-card {
+  margin: 14px 20px;
+  padding: 13px 15px;
+  background: var(--blue-light);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--blue);
+}
+.tip-card p { font-size: 13px; color: var(--blue-dark); line-height: 1.55; }
+
+.sentence-block {
+  margin: 0 20px 12px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.s-counter { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 8px; }
+.s-text { font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.45; color: var(--text); }
+.s-phonetic { font-size: 13px; color: var(--text-3); margin-top: 8px; font-style: italic; }
+.s-focus {
+  margin-top: 10px; display: inline-block;
+  font-size: 12px; color: var(--green-dark);
+  background: var(--green-light); padding: 3px 10px; border-radius: 20px;
+}
+
+.loading-sentence {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px; color: var(--text-3); font-size: 14px;
+}
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.audio-row { display: flex; gap: 8px; margin: 0 20px 12px; }
+.aud-btn {
+  flex: 1; padding: 12px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; color: var(--text);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s;
+}
+.aud-btn.green { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.aud-btn.rec { background: var(--coral-light); border-color: var(--coral); color: var(--coral); }
+.aud-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+.dot-row { display: flex; justify-content: center; gap: 6px; margin: 10px 0; }
+.dot { width: 7px; height: 7px; border-radius: 4px; background: var(--gray-100); transition: all 0.25s; }
+.dot.active { width: 20px; background: var(--green); }
+.dot.done { background: var(--green-light); }
+
+.next-row {
+  margin: 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.15s;
+}
+.next-row:active { background: var(--gray-50); }
+.next-row span { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.gen-btn {
+  width: calc(100% - 40px); margin: 12px 20px 0;
+  padding: 12px;
+  background: var(--surface); border: 1px dashed var(--green);
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; color: var(--green-mid); font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+}
+.gen-btn:active { opacity: 0.75; }
+
+/* ---- ASK AI ---- */
+.ask-wrap { padding: 14px 20px 0; }
+.ask-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 4px; }
+.ask-sub { font-size: 13px; color: var(--text-3); margin-bottom: 14px; }
+
+.chat-log {
+  margin: 0 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.msg {
+  max-width: 85%;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 14px; line-height: 1.55;
+}
+.msg.user {
+  align-self: flex-end;
+  background: var(--green); color: white;
+  border-bottom-right-radius: 4px;
+}
+.msg.ai {
+  align-self: flex-start;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+.msg.thinking { color: var(--text-3); font-style: italic; }
+.msg.thinking .spinner { display: inline-block; vertical-align: middle; margin-right: 6px; }
+
+.quick-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px 0; }
+.chip {
+  padding: 7px 13px;
+  border: 1px solid var(--border); border-radius: 20px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  background: var(--surface); color: var(--text-2);
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.chip:active { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+
+.ask-input-row {
+  position: sticky; bottom: calc(var(--nav-h)); left: 0; right: 0;
+  padding: 12px 20px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.ask-input {
+  flex: 1; padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+  outline: none; resize: none;
+}
+.ask-input:focus { border-color: var(--green); }
+.send-btn {
+  width: 42px; height: 42px;
+  background: var(--green); border: none; border-radius: var(--radius-sm);
+  color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.send-btn:active { opacity: 0.85; }
+
+/* ---- PROGRESS ---- */
+.prog-screen-wrap { padding: 14px 20px 0; }
+.prog-screen-wrap h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 14px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.stat-box {
+  padding: 14px 10px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  text-align: center;
+}
+.stat-val { font-size: 24px; font-weight: 600; color: var(--text); }
+.stat-lbl { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.cal-section { margin-bottom: 20px; }
+.cal-month { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-hd { font-size: 10px; color: var(--text-3); text-align: center; padding: 4px 0; font-weight: 600; }
+.cal-d {
+  aspect-ratio: 1; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--text-3);
+}
+.cal-d.done { background: var(--green); color: white; font-weight: 600; }
+.cal-d.today { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+
+.unit-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+.unit-row {
+  background: var(--surface); padding: 13px 16px;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+}
+.unit-badge {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.unit-badge.active { background: var(--green-light); color: var(--green-dark); }
+.unit-badge.done { background: var(--green); color: white; }
+.unit-badge.locked { background: var(--gray-50); color: var(--gray-400); }
+.unit-info { flex: 1; }
+.unit-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.unit-desc { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+.unit-wk { font-size: 11px; color: var(--text-3); }
+
+/* ---- BOTTOM NAV ---- */
+.bottom-nav {
+  height: var(--nav-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; flex-shrink: 0;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; border: none; background: transparent; cursor: pointer;
+}
+.nav-btn svg { width: 22px; height: 22px; stroke: var(--text-3); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav-btn span { font-size: 10px; color: var(--text-3); font-family: 'DM Sans', sans-serif; }
+.nav-btn.active svg { stroke: var(--green); }
+.nav-btn.active span { color: var(--green); font-weight: 600; }
+
+/* ---- TOAST ---- */
+.toast {
+  position: fixed; bottom: calc(var(--nav-h) + 16px); left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--gray-900); color: white; padding: 10px 18px;
+  border-radius: 20px; font-size: 13px; font-weight: 500;
+  opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---- SETTINGS ---- */
+.settings-wrap { padding: 14px 20px 0; }
+.settings-wrap h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 20px; }
+.settings-group { margin-bottom: 24px; }
+.settings-label { font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+.settings-row {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.settings-row .sr-label { font-size: 14px; color: var(--text); }
+.settings-row .sr-val { font-size: 13px; color: var(--text-3); }
+.settings-row button {
+  font-size: 12px; color: var(--blue-dark);
+  background: var(--blue-light); border: none;
+  padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; font-family: 'DM Sans', sans-serif;
+}
+.danger-btn {
+  width: 100%; padding: 14px;
+  background: none; border: 1px solid #F09595; border-radius: var(--radius);
+  font-size: 14px; color: var(--coral); font-family: 'DM Sans', sans-serif; cursor: pointer;
+}
+
+/* ---- COMPLETE SCREEN ---- */
+.complete-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.complete-overlay.show { display: flex; }
+.complete-card {
+  background: var(--surface); border-radius: 24px;
+  padding: 32px 24px; text-align: center; width: 100%; max-width: 340px;
+}
+.complete-emoji { font-size: 56px; margin-bottom: 16px; }
+.complete-title { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 8px; }
+.complete-sub { font-size: 14px; color: var(--text-2); line-height: 1.5; margin-bottom: 24px; }
+.complete-ok {
+  width: 100%; padding: 14px;
+  background: var(--green); color: white; border: none;
+  border-radius: var(--radius); font-size: 15px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="app-shell" id="app">
+
+  <!-- ONBOARDING -->
+  <div class="screen active" id="screen-onboard" style="padding-bottom:0; display:flex; flex-direction:column; justify-content:center; padding:40px 28px;">
+    <div class="onboard-icon">🎙️</div>
+    <h1 class="onboard-title">American Accent Coach</h1>
+    <p class="onboard-sub">Daily pronunciation training to sound natural in the classroom. Powered by AI.</p>
+
+    <div class="api-section">
+      <div class="api-label">Your Anthropic API Key</div>
+      <div class="api-input-wrap">
+        <input type="password" class="api-input" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+        <button class="api-toggle" id="api-toggle" onclick="toggleApiVis()">show</button>
+      </div>
+      <p class="api-hint">Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> — stored locally, never sent anywhere else.</p>
+    </div>
+
+    <button class="start-btn" id="onboard-btn" onclick="startApp()" disabled>Get started →</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen" id="screen-home">
+    <div class="top-bar">
+      <div class="top-bar-row">
+        <div>
+          <h1>Good morning 👋</h1>
+          <div class="sub">Ready for today's practice?</div>
+        </div>
+        <div class="streak-chip">🔥 <span id="streak-num">0</span></div>
+      </div>
+    </div>
+
+    <div class="home-hero">
+      <div class="hero-header">
+        <div class="hero-label">Today's focus</div>
+        <div class="hero-title" id="home-unit-name">Rhotic R</div>
+        <div class="hero-subtitle" id="home-unit-desc">r in all word positions</div>
+      </div>
+      <div class="hero-body">
+        <div class="prog-row">
+          <div class="prog-track"><div class="prog-fill" id="home-prog-fill" style="width:0%"></div></div>
+          <div class="prog-text" id="home-prog-text">0/5</div>
+        </div>
+        <button class="go-btn" onclick="goToPractice()">Continue practice →</button>
+      </div>
+    </div>
+
+    <div class="section-hd">This week</div>
+    <div class="week-strip" id="week-strip"></div>
+
+    <div class="reminder-row">
+      <div class="reminder-info">
+        <p>Daily reminder</p>
+        <p id="reminder-display">9:00 AM every day</p>
+      </div>
+      <button class="reminder-edit-btn" onclick="editReminder()">Edit</button>
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="screen" id="screen-practice">
+    <div class="practice-nav">
+      <button class="back-btn" onclick="showScreen('home')">← Back</button>
+    </div>
+
+    <div class="tip-card">
+      <p id="prac-tip">Loading tip...</p>
+    </div>
+
+    <div id="sentence-area">
+      <div class="loading-sentence"><div class="spinner"></div> Generating sentences with AI...</div>
+    </div>
+
+    <div class="dot-row" id="dot-row"></div>
+
+    <div class="next-row" id="next-row" onclick="nextSentence()" style="display:none">
+      <span id="next-lbl">Next sentence</span>
+      <span>→</span>
+    </div>
+
+    <button class="gen-btn" id="regen-btn" onclick="regenSentences()" style="display:none">
+      ✦ Generate new sentences with AI
+    </button>
+  </div>
+
+  <!-- ASK AI -->
+  <div class="screen" id="screen-ask">
+    <div class="ask-wrap">
+      <h2 class="ask-title">Ask about pronunciation</h2>
+      <p class="ask-sub">Ask anything — sounds, rhythm, differences from Korean, tips...</p>
+    </div>
+    <div class="chat-log" id="chat-log"></div>
+    <div class="quick-chips" id="quick-chips">
+      <div class="chip" onclick="askChip('What makes American R different from Korean R?')">American R vs Korean R</div>
+      <div class="chip" onclick="askChip('How do I do T flapping naturally?')">T flapping</div>
+      <div class="chip" onclick="askChip('What is schwa and why is it important?')">Schwa /ə/</div>
+      <div class="chip" onclick="askChip('How can I sound more natural in classroom lectures?')">Classroom tips</div>
+      <div class="chip" onclick="askChip('What is the difference between æ and ʌ?')">/æ/ vs /ʌ/</div>
+    </div>
+    <div class="ask-input-row">
+      <input type="text" class="ask-input" id="ask-input" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendAsk()">
+      <button class="send-btn" onclick="sendAsk()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="screen" id="screen-progress">
+    <div class="prog-screen-wrap">
+      <h2>Your progress</h2>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="st-streak">0</div><div class="stat-lbl">Day streak</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-sessions">0</div><div class="stat-lbl">Sessions</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-pct">0%</div><div class="stat-lbl">Complete</div></div>
+      </div>
+      <div class="cal-section">
+        <div class="cal-month">March 2026</div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="section-hd" style="padding:0; margin-bottom:10px;">Curriculum</div>
+      <div class="unit-list" id="unit-list"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV (hidden during onboard) -->
+  <div class="bottom-nav" id="bottom-nav" style="display:none">
+    <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-btn" id="nav-practice" onclick="goToPractice()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/></svg>
+      <span>Practice</span>
+    </button>
+    <button class="nav-btn" id="nav-ask" onclick="showScreen('ask')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Ask AI</span>
+    </button>
+    <button class="nav-btn" id="nav-progress" onclick="showScreen('progress')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Progress</span>
+    </button>
+  </div>
+</div>
+
+<!-- COMPLETE OVERLAY -->
+<div class="complete-overlay" id="complete-overlay">
+  <div class="complete-card">
+    <div class="complete-emoji">🎉</div>
+    <div class="complete-title">Session complete!</div>
+    <div class="complete-sub" id="complete-sub">Great work. You're building real habits. Come back tomorrow!</div>
+    <button class="complete-ok" onclick="closeComplete()">Back to home</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================
+// STATE
+// =====================
+const curriculum = [
+  { id:1, name:"Rhotic R", weeks:"Week 1–2", desc:"r in all word positions", status:"active",
+    tip:"Curl your tongue back slightly — the tip should NOT touch the roof of your mouth. Your lips round slightly. The R is never silent in American English." },
+  { id:2, name:"T Flapping", weeks:"Week 3–4", desc:"butter, better, water", status:"locked",
+    tip:"Between two vowels, American T sounds like a soft D. 'Better' sounds like 'bedder'. The tongue taps quickly — it never stops the airflow completely." },
+  { id:3, name:"Stress & Rhythm", weeks:"Week 5–6", desc:"English beat and word stress", status:"locked",
+    tip:"English is stress-timed. Stressed syllables are louder, longer, and clearer. Unstressed syllables shrink into a quick schwa /ə/. Content words are stressed; function words are reduced." },
+  { id:4, name:"Linking & Reduction", weeks:"Week 7–8", desc:"gonna, wanna, connected speech", status:"locked",
+    tip:"In natural speech, words blend together. 'Going to' → 'gonna'. 'Did you' → 'didja'. This is not lazy — it IS how native speakers talk in real conversation." },
+  { id:5, name:"Vowels: æ and ʌ", weeks:"Week 9–10", desc:"cat vs cut, trap vs strut", status:"locked",
+    tip:"/æ/ — mouth wide open, tongue flat and low, like saying 'ah' from the front of your mouth. /ʌ/ — relaxed center of the mouth, a quick neutral 'uh'." },
+  { id:6, name:"Intonation Patterns", weeks:"Week 11–12", desc:"falling, rising, listing tones", status:"locked",
+    tip:"Statements fall at the end. Yes/no questions rise. Lists rise on each item until the last, which falls. Mastering intonation makes you sound confident and natural in lectures." }
+];
+
+let state = {
+  apiKey: '',
+  streak: 0,
+  sessions: 0,
+  completedDays: [],
+  reminderTime: '9:00 AM',
+  currentUnit: 0,
+  todaySentences: [],
+  currentSentenceIdx: 0,
+  todayDone: 0,
+  todayTarget: 5,
+  lastPracticeDate: '',
+  chatHistory: []
+};
+
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let recordedBlob = null;
+
+// =====================
+// INIT
+// =====================
+function init() {
+  const saved = localStorage.getItem('aac_state');
+  if (saved) {
+    try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
+  }
+  const inp = document.getElementById('api-key-input');
+  inp.addEventListener('input', () => {
+    document.getElementById('onboard-btn').disabled = inp.value.trim().length < 10;
+  });
+  if (state.apiKey) {
+    document.getElementById('api-key-input').value = state.apiKey;
+    document.getElementById('onboard-btn').disabled = false;
+    launchApp();
+  }
+}
+
+function save() {
+  localStorage.setItem('aac_state', JSON.stringify(state));
+}
+
+function startApp() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) return;
+  state.apiKey = key;
+  save();
+  launchApp();
+}
+
+function launchApp() {
+  document.getElementById('bottom-nav').style.display = 'flex';
+  checkStreak();
+  showScreen('home');
+  renderHome();
+}
+
+function checkStreak() {
+  const today = new Date().toDateString();
+  if (state.lastPracticeDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (state.lastPracticeDate !== yesterday && state.lastPracticeDate !== '') {
+    state.streak = 0;
+  }
+}
+
+// =====================
+// SCREENS
+// =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  const nb = document.getElementById('nav-' + id);
+  if (nb) nb.classList.add('active');
+  if (id === 'progress') renderProgress();
+  if (id === 'ask') renderAskScreen();
+}
+
+// =====================
+// HOME
+// =====================
+function renderHome() {
+  const unit = curriculum[state.currentUnit];
+  document.getElementById('home-unit-name').textContent = unit.name;
+  document.getElementById('home-unit-desc').textContent = unit.desc;
+  document.getElementById('streak-num').textContent = state.streak;
+
+  const pct = state.todayTarget > 0 ? Math.round((state.todayDone / state.todayTarget) * 100) : 0;
+  document.getElementById('home-prog-fill').style.width = pct + '%';
+  document.getElementById('home-prog-text').textContent = state.todayDone + '/' + state.todayTarget;
+
+  const now = new Date();
+  const h = now.getHours();
+  const greeting = h < 12 ? 'Good morning 👋' : h < 17 ? 'Good afternoon 👋' : 'Good evening 👋';
+  document.querySelector('#screen-home .top-bar h1').textContent = greeting;
+
+  renderWeekStrip();
+  document.getElementById('reminder-display').textContent = state.reminderTime + ' every day';
+}
+
+function renderWeekStrip() {
+  const strip = document.getElementById('week-strip');
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const today = new Date();
+  strip.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toDateString();
+    const isToday = i === 0;
+    const done = state.completedDays.includes(key);
+    const el = document.createElement('div');
+    el.className = 'week-cell' + (done ? ' done' : '') + (isToday && !done ? ' today' : '');
+    el.innerHTML = '<div>' + days[d.getDay()] + '</div><div class="dn">' + d.getDate() + '</div>';
+    strip.appendChild(el);
+  }
+}
+
+function editReminder() {
+  const t = prompt('Set daily reminder time (e.g. 9:00 AM):', state.reminderTime);
+  if (t) { state.reminderTime = t; save(); renderHome(); }
+}
+
+// =====================
+// PRACTICE
+// =====================
+async function goToPractice() {
+  showScreen('practice');
+  document.getElementById('nav-practice').classList.add('active');
+  document.getElementById('prac-tip').textContent = curriculum[state.currentUnit].tip;
+
+  if (state.todaySentences.length === 0) {
+    await generateSentences();
+  } else {
+    renderSentence();
+  }
+}
+
+async function generateSentences() {
+  const unit = curriculum[state.currentUnit];
+  document.getElementById('sentence-area').innerHTML = '<div class="loading-sentence"><div class="spinner"></div> Generating sentences with AI...</div>';
+  document.getElementById('next-row').style.display = 'none';
+  document.getElementById('regen-btn').style.display = 'none';
+  document.getElementById('dot-row').innerHTML = '';
+
+  const prompt = `You are an American English pronunciation coach. Generate exactly 5 practice sentences for a Korean English teacher who wants to sound like a Korean-American (교포) native speaker. 
+
+Topic: "${unit.name}" — ${unit.desc}
+
+Requirements:
+- Each sentence should target the "${unit.name}" pattern specifically
+- Use vocabulary common in university classroom / lecture settings  
+- Include pronunciation guide in IPA
+- Keep sentences 8-15 words long
+- Make them progressively challenging
+
+Respond ONLY with valid JSON, no markdown, no explanation:
+{
+  "sentences": [
+    { "text": "...", "phonetic": "/IPA here/", "focus": "short tip under 12 words" },
+    ...
+  ]
+}`;
+
+  try {
+    const res = await callClaude(prompt, 800);
+    const clean = res.replace(/```json|```/g, '').trim();
+    const data = JSON.parse(clean);
+    state.todaySentences = data.sentences;
+    state.currentSentenceIdx = 0;
+    save();
+    renderSentence();
+  } catch(e) {
+    document.getElementById('sentence-area').innerHTML = '<div class="loading-sentence" style="color:#D85A30">Failed to generate. Check your API key.</div>';
+    document.getElementById('regen-btn').style.display = 'block';
+  }
+}
+
+function renderSentence() {
+  const sentences = state.todaySentences;
+  const idx = state.currentSentenceIdx;
+  if (!sentences || sentences.length === 0) return;
+  const s = sentences[idx];
+
+  document.getElementById('sentence-area').innerHTML = `
+    <div class="sentence-block">
+      <div class="s-counter">Sentence ${idx + 1} of ${sentences.length}</div>
+      <div class="s-text">${s.text}</div>
+      <div class="s-phonetic">${s.phonetic}</div>
+      <div class="s-focus">${s.focus}</div>
+    </div>
+    <div class="audio-row">
+      <button class="aud-btn green" id="play-btn" onclick="simulatePlay()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+        Hear native
+      </button>
+      <button class="aud-btn" id="rec-btn" onclick="toggleRecord()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        Record me
+      </button>
+    </div>`;
+
+  const dots = document.getElementById('dot-row');
+  dots.innerHTML = sentences.map((_, i) =>
+    `<div class="dot${i === idx ? ' active' : i < idx ? ' done' : ''}"></div>`
+  ).join('');
+
+  const isLast = idx === sentences.length - 1;
+  const nr = document.getElementById('next-row');
+  nr.style.display = 'flex';
+  document.getElementById('next-lbl').textContent = isLast ? 'Complete session ✓' : 'Next sentence';
+  document.getElementById('regen-btn').style.display = 'block';
+}
+
+function nextSentence() {
+  const sentences = state.todaySentences;
+  const idx = state.currentSentenceIdx;
+  if (idx < sentences.length - 1) {
+    state.currentSentenceIdx++;
+    save();
+    renderSentence();
+  } else {
+    completeSession();
+  }
+}
+
+function completeSession() {
+  state.todayDone = Math.min(state.todayTarget, state.todayDone + 1);
+  const today = new Date().toDateString();
+  if (!state.completedDays.includes(today)) {
+    state.completedDays.push(today);
+    if (state.lastPracticeDate !== today) {
+      state.streak++;
+      state.lastPracticeDate = today;
+    }
+  }
+  state.sessions++;
+  state.todaySentences = [];
+  state.currentSentenceIdx = 0;
+  save();
+
+  document.getElementById('complete-sub').textContent =
+    state.streak > 1
+      ? `${state.streak} day streak! You're building a real habit. Come back tomorrow!`
+      : 'Great start! Consistent daily practice is the key. Come back tomorrow!';
+  document.getElementById('complete-overlay').classList.add('show');
+}
+
+function closeComplete() {
+  document.getElementById('complete-overlay').classList.remove('show');
+  showScreen('home');
+  renderHome();
+}
+
+function regenSentences() {
+  state.todaySentences = [];
+  state.currentSentenceIdx = 0;
+  save();
+  generateSentences();
+}
+
+function simulatePlay() {
+  const btn = document.getElementById('play-btn');
+  if (!btn) return;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div> Playing...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Hear native';
+    btn.disabled = false;
+  }, 2200);
+  showToast('In production: connects to TTS API');
+}
+
+async function toggleRecord() {
+  const btn = document.getElementById('rec-btn');
+  if (!btn) return;
+
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        stream.getTracks().forEach(t => t.stop());
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Play back`;
+        btn.className = 'aud-btn green';
+        btn.onclick = playback;
+        isRecording = false;
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;border-top-color:#D85A30;"></div> Stop';
+      btn.className = 'aud-btn rec';
+    } catch(e) {
+      showToast('Microphone access denied');
+    }
+  } else {
+    mediaRecorder.stop();
+  }
+}
+
+function playback() {
+  if (!recordedBlob) return;
+  const url = URL.createObjectURL(recordedBlob);
+  const audio = new Audio(url);
+  audio.play();
+  const btn = document.getElementById('rec-btn');
+  if (btn) { btn.innerHTML = '▶ Playing...'; setTimeout(() => { btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Play back'; }, 3000); }
+}
+
+// =====================
+// ASK AI
+// =====================
+function renderAskScreen() {
+  const log = document.getElementById('chat-log');
+  if (log.children.length === 0 && state.chatHistory.length === 0) {
+    addMsg('ai', 'Hi! I\'m your pronunciation coach. Ask me anything about American English sounds — I\'ll explain it specifically for Korean speakers learning to sound natural in the classroom. 🎙️');
+  }
+}
+
+function askChip(q) {
+  document.getElementById('ask-input').value = q;
+  sendAsk();
+  document.getElementById('quick-chips').style.display = 'none';
+}
+
+async function sendAsk() {
+  const inp = document.getElementById('ask-input');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+
+  addMsg('user', q);
+  state.chatHistory.push({ role: 'user', content: q });
+
+  const thinkId = 'think-' + Date.now();
+  const log = document.getElementById('chat-log');
+  const thinking = document.createElement('div');
+  thinking.className = 'msg ai thinking';
+  thinking.id = thinkId;
+  thinking.innerHTML = '<div class="spinner" style="display:inline-block;width:14px;height:14px;border-width:2px;vertical-align:middle;margin-right:6px;"></div> Thinking...';
+  log.appendChild(thinking);
+  log.scrollTop = log.scrollHeight;
+
+  const systemPrompt = `You are an expert American English pronunciation coach helping a Korean English teacher who has worked as an interpreter for many years. They want to sound like a Korean-American (교포) native speaker, especially in university classroom/lecture settings. Give concise, practical, specific advice. When explaining sounds, use Korean comparisons where helpful. Keep responses under 150 words.`;
+
+  const messages = state.chatHistory.slice(-8);
+
+  try {
+    const reply = await callClaude(q, 400, systemPrompt, messages);
+    document.getElementById(thinkId)?.remove();
+    state.chatHistory.push({ role: 'assistant', content: reply });
+    save();
+    addMsg('ai', reply);
+  } catch(e) {
+    document.getElementById(thinkId)?.remove();
+    addMsg('ai', 'Sorry, I had trouble connecting. Please check your API key in Settings.');
+  }
+}
+
+function addMsg(role, text) {
+  const log = document.getElementById('chat-log');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.textContent = text;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+// =====================
+// PROGRESS
+// =====================
+function renderProgress() {
+  document.getElementById('st-streak').textContent = state.streak;
+  document.getElementById('st-sessions').textContent = state.sessions;
+  const pct = Math.round((state.currentUnit / curriculum.length) * 100);
+  document.getElementById('st-pct').textContent = pct + '%';
+
+  const grid = document.getElementById('cal-grid');
+  const hds = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  grid.innerHTML = hds.map(h => `<div class="cal-hd">${h}</div>`).join('');
+  const first = new Date(2026, 2, 1).getDay();
+  for (let i = 0; i < first; i++) grid.innerHTML += '<div class="cal-d"></div>';
+  for (let d = 1; d <= 31; d++) {
+    const key = new Date(2026, 2, d).toDateString();
+    const today = new Date().getDate() === d && new Date().getMonth() === 2;
+    const done = state.completedDays.includes(key);
+    grid.innerHTML += `<div class="cal-d${done ? ' done' : today ? ' today' : ''}">${d}</div>`;
+  }
+
+  const list = document.getElementById('unit-list');
+  list.innerHTML = curriculum.map((u, i) => {
+    const s = i < state.currentUnit ? 'done' : i === state.currentUnit ? 'active' : 'locked';
+    const icon = s === 'done' ? '✓' : s === 'active' ? u.id : '🔒';
+    return `<div class="unit-row"><div class="unit-badge ${s}">${icon}</div><div class="unit-info"><div class="unit-name">${u.name}</div><div class="unit-desc">${u.desc}</div></div><div class="unit-wk">${u.weeks}</div></div>`;
+  }).join('');
+}
+
+// =====================
+// API CALL
+// =====================
+async function callClaude(userMsg, maxTokens = 600, system = null, history = null) {
+  const messages = history
+    ? history.map(m => ({ role: m.role, content: m.content }))
+    : [{ role: 'user', content: userMsg }];
+
+  if (history && history[history.length - 1]?.role !== 'user') {
+    messages.push({ role: 'user', content: userMsg });
+  }
+
+  const body = {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: maxTokens,
+    messages
+  };
+  if (system) body.system = system;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': state.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'API error ' + res.status);
+  }
+
+  const data = await res.json();
+  return data.content?.[0]?.text || '';
+}
+
+// =====================
+// UTILS
+// =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function toggleApiVis() {
+  const inp = document.getElementById('api-key-input');
+  const btn = document.getElementById('api-toggle');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'hide'; }
+  else { inp.type = 'password'; btn.textContent = 'show'; }
+}
+
+// =====================
+// BOOT
+// =====================
+init();
+</script>
+</body>
+</html>
