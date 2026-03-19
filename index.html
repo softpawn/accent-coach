@@ -294,6 +294,73 @@ html, body {
 }
 .gen-btn:active { opacity: 0.75; }
 
+/* ---- WORD DRILL ---- */
+.phase-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0 20px 10px;
+  padding: 5px 12px;
+  border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.phase-badge.word { background: var(--amber-light); color: var(--amber-dark); }
+.phase-badge.full { background: var(--green-light); color: var(--green-dark); }
+
+.word-scroll {
+  padding: 0 20px 4px;
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  margin-bottom: 12px;
+}
+.word-scroll::-webkit-scrollbar { display: none; }
+.word-pill {
+  flex-shrink: 0; padding: 7px 14px;
+  border-radius: 20px; font-size: 14px; font-weight: 500;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text-3); white-space: nowrap; transition: all 0.2s;
+}
+.word-pill.active {
+  background: var(--amber-light); border-color: var(--amber);
+  color: var(--amber-dark); transform: scale(1.08);
+}
+.word-pill.done {
+  background: var(--green-light); border-color: var(--green);
+  color: var(--green-dark);
+}
+
+.drill-card {
+  margin: 0 20px 12px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.drill-word {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px; color: var(--text);
+  margin-bottom: 6px; line-height: 1.2;
+}
+.drill-phonetic { font-size: 15px; color: var(--text-3); font-style: italic; margin-bottom: 4px; }
+.drill-tip { font-size: 12px; color: var(--green-dark); margin-top: 10px; }
+
+.full-sentence-card {
+  margin: 0 20px 12px;
+  padding: 18px;
+  background: var(--surface);
+  border: 2px solid var(--green);
+  border-radius: var(--radius);
+}
+.full-sentence-card .s-counter { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 8px; }
+.full-sentence-card .s-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px; line-height: 1.5; color: var(--text);
+}
+.full-sentence-card .s-text .w-done { color: var(--green); }
+.full-sentence-card .s-phonetic { font-size: 13px; color: var(--text-3); margin-top: 8px; font-style: italic; }
+.full-sentence-card .s-focus {
+  margin-top: 10px; display: inline-block;
+  font-size: 12px; color: var(--green-dark);
+  background: var(--green-light); padding: 3px 10px; border-radius: 20px;
+}
+
 /* ---- ASK AI ---- */
 .ask-wrap { padding: 14px 20px 0; }
 .ask-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 4px; }
@@ -540,14 +607,29 @@ html, body {
       <p id="prac-tip">Loading tip...</p>
     </div>
 
+    <div id="phase-badge-area"></div>
+    <div id="word-scroll-area"></div>
+
     <div id="sentence-area">
       <div class="loading-sentence"><div class="spinner"></div> Generating sentences with AI...</div>
     </div>
 
+    <div class="audio-row" id="audio-row" style="display:none">
+      <button class="aud-btn green" id="play-btn" onclick="speakCurrent()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+        Hear native
+      </button>
+      <button class="aud-btn" id="rec-btn" onclick="toggleRecord()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        Record me
+      </button>
+    </div>
+    <audio id="playback-audio" style="display:none"></audio>
+
     <div class="dot-row" id="dot-row"></div>
 
-    <div class="next-row" id="next-row" onclick="nextSentence()" style="display:none">
-      <span id="next-lbl">Next sentence</span>
+    <div class="next-row" id="next-row" onclick="handleNext()" style="display:none">
+      <span id="next-lbl">Next word</span>
       <span>→</span>
     </div>
 
@@ -828,51 +910,239 @@ Respond ONLY with valid JSON, no markdown, no explanation:
   }
 }
 
+/* =====================
+   PRACTICE STATE
+   ===================== */
+let practicePhase = 'word';   // 'word' | 'full'
+let wordIdx = 0;              // current word index in word phase
+let wordPhonetics = [];       // per-word IPA extracted from sentence phonetic
+
+function getWords(text) {
+  return text.replace(/[.,!?;:]/g, '').split(/\s+/).filter(Boolean);
+}
+
+/* Naive per-word phonetic splitter — splits IPA string by spaces */
+function splitPhonetics(phonetic, words) {
+  const cleaned = phonetic.replace(/^\/|\/$/g, '').trim();
+  const parts = cleaned.split(/\s+/);
+  const result = [];
+  let pi = 0;
+  for (let i = 0; i < words.length; i++) {
+    result.push(parts[pi] ? '/' + parts[pi] + '/' : '');
+    pi++;
+  }
+  return result;
+}
+
 function renderSentence() {
   const sentences = state.todaySentences;
   const idx = state.currentSentenceIdx;
   if (!sentences || sentences.length === 0) return;
+
+  practicePhase = 'word';
+  wordIdx = 0;
   const s = sentences[idx];
+  wordPhonetics = splitPhonetics(s.phonetic, getWords(s.text));
 
-  document.getElementById('sentence-area').innerHTML = `
-    <div class="sentence-block">
-      <div class="s-counter">Sentence ${idx + 1} of ${sentences.length}</div>
-      <div class="s-text">${s.text}</div>
-      <div class="s-phonetic">${s.phonetic}</div>
-      <div class="s-focus">${s.focus}</div>
-    </div>
-    <div class="audio-row">
-      <button class="aud-btn green" id="play-btn" onclick="simulatePlay()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
-        Hear native
-      </button>
-      <button class="aud-btn" id="rec-btn" onclick="toggleRecord()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-        Record me
-      </button>
-    </div>`;
+  renderWordPhase();
 
+  /* sentence dots */
   const dots = document.getElementById('dot-row');
   dots.innerHTML = sentences.map((_, i) =>
     `<div class="dot${i === idx ? ' active' : i < idx ? ' done' : ''}"></div>`
   ).join('');
 
-  const isLast = idx === sentences.length - 1;
-  const nr = document.getElementById('next-row');
-  nr.style.display = 'flex';
-  document.getElementById('next-lbl').textContent = isLast ? 'Complete session ✓' : 'Next sentence';
   document.getElementById('regen-btn').style.display = 'block';
 }
 
-function nextSentence() {
+function renderWordPhase() {
+  const s = state.todaySentences[state.currentSentenceIdx];
+  const words = getWords(s.text);
+  const word = words[wordIdx];
+  const phonetic = wordPhonetics[wordIdx] || '';
+
+  /* phase badge */
+  document.getElementById('phase-badge-area').innerHTML =
+    `<div class="phase-badge word">
+       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+       Word drill — ${wordIdx + 1} of ${words.length}
+     </div>`;
+
+  /* word pills */
+  document.getElementById('word-scroll-area').innerHTML =
+    `<div class="word-scroll">${
+      words.map((w, i) =>
+        `<div class="word-pill${i === wordIdx ? ' active' : i < wordIdx ? ' done' : ''}">${w}</div>`
+      ).join('')
+    }</div>`;
+
+  /* drill card */
+  document.getElementById('sentence-area').innerHTML =
+    `<div class="drill-card">
+       <div class="drill-word">${word}</div>
+       <div class="drill-phonetic">${phonetic}</div>
+       <div class="drill-tip">${s.focus}</div>
+     </div>`;
+
+  document.getElementById('audio-row').style.display = 'flex';
+  resetRecBtn();
+  document.getElementById('next-row').style.display = 'flex';
+  document.getElementById('next-lbl').textContent =
+    wordIdx < words.length - 1 ? `Next word →` : 'Practice full sentence →';
+}
+
+function renderFullPhase() {
   const sentences = state.todaySentences;
   const idx = state.currentSentenceIdx;
-  if (idx < sentences.length - 1) {
-    state.currentSentenceIdx++;
-    save();
-    renderSentence();
+  const s = sentences[idx];
+  const words = getWords(s.text);
+
+  /* colored words showing all done */
+  const coloredText = words.map(w => `<span class="w-done">${w}</span>`).join(' ');
+
+  document.getElementById('phase-badge-area').innerHTML =
+    `<div class="phase-badge full">
+       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+       Full sentence — ${idx + 1} of ${sentences.length}
+     </div>`;
+
+  document.getElementById('word-scroll-area').innerHTML = '';
+
+  document.getElementById('sentence-area').innerHTML =
+    `<div class="full-sentence-card">
+       <div class="s-counter">Now put it all together</div>
+       <div class="s-text">${coloredText}</div>
+       <div class="s-phonetic">${s.phonetic}</div>
+       <div class="s-focus">${s.focus}</div>
+     </div>`;
+
+  document.getElementById('audio-row').style.display = 'flex';
+  resetRecBtn();
+  document.getElementById('next-row').style.display = 'flex';
+  const isLast = idx === sentences.length - 1;
+  document.getElementById('next-lbl').textContent = isLast ? 'Complete session ✓' : 'Next sentence →';
+}
+
+function handleNext() {
+  const s = state.todaySentences[state.currentSentenceIdx];
+  const words = getWords(s.text);
+
+  if (practicePhase === 'word') {
+    if (wordIdx < words.length - 1) {
+      wordIdx++;
+      renderWordPhase();
+    } else {
+      practicePhase = 'full';
+      renderFullPhase();
+    }
   } else {
-    completeSession();
+    /* full phase done — move to next sentence */
+    if (state.currentSentenceIdx < state.todaySentences.length - 1) {
+      state.currentSentenceIdx++;
+      save();
+      renderSentence();
+    } else {
+      completeSession();
+    }
+  }
+}
+
+/* what speakCurrent reads depends on phase */
+function speakCurrent() {
+  const s = state.todaySentences[state.currentSentenceIdx];
+  if (!s) return;
+  const textToSpeak = practicePhase === 'word'
+    ? getWords(s.text)[wordIdx]
+    : s.text;
+  _doSpeak(textToSpeak, practicePhase === 'word' ? 0.78 : 0.85);
+}
+
+function _doSpeak(text, rate) {
+  const btn = document.getElementById('play-btn');
+  if (!window.speechSynthesis) { showToast('TTS not supported'); return; }
+  window.speechSynthesis.cancel();
+  _loadVoices();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US'; utt.rate = rate; utt.pitch = 1.0;
+  const voice = _pickVoice();
+  if (voice) utt.voice = voice;
+  if (btn) {
+    btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;flex-shrink:0;"></div> Playing...';
+    btn.disabled = true;
+  }
+  utt.onend = utt.onerror = () => {
+    if (btn) {
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Hear native';
+      btn.disabled = false;
+    }
+  };
+  window.speechSynthesis.speak(utt);
+  const stallCheck = setInterval(() => {
+    if (!window.speechSynthesis.speaking) { clearInterval(stallCheck); return; }
+    if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+  }, 5000);
+}
+
+/* =====================
+   RECORD + PLAYBACK FIX
+   ===================== */
+function resetRecBtn() {
+  recordedBlob = null;
+  isRecording = false;
+  const btn = document.getElementById('rec-btn');
+  if (!btn) return;
+  btn.className = 'aud-btn';
+  btn.onclick = toggleRecord;
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg> Record me`;
+}
+
+async function toggleRecord() {
+  const btn = document.getElementById('rec-btn');
+  if (!btn) return;
+
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+      mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        recordedBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        /* attach to persistent <audio> element — avoids iOS blob URL issues */
+        const audioEl = document.getElementById('playback-audio');
+        const url = URL.createObjectURL(recordedBlob);
+        audioEl.src = url;
+        btn.className = 'aud-btn green';
+        btn.onclick = playback;
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Play back`;
+        isRecording = false;
+      };
+      mediaRecorder.start(100);
+      isRecording = true;
+      btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;border-top-color:#D85A30;"></div> Stop';
+      btn.className = 'aud-btn rec';
+    } catch(e) {
+      showToast('Microphone access denied');
+    }
+  } else {
+    mediaRecorder.stop();
+  }
+}
+
+function playback() {
+  const audioEl = document.getElementById('playback-audio');
+  const btn = document.getElementById('rec-btn');
+  if (!audioEl || !audioEl.src) { showToast('No recording yet'); return; }
+  audioEl.currentTime = 0;
+  audioEl.play().catch(() => showToast('Playback failed'));
+  if (btn) {
+    btn.innerHTML = '▶ Playing...';
+    audioEl.onended = () => {
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Play back`;
+    };
   }
 }
 
@@ -928,86 +1198,6 @@ function _pickVoice() {
   return all.find(v => v.lang === 'en-US' && /Samantha|Alex|Google US English|Microsoft Aria|Microsoft Jenny|Microsoft Guy/i.test(v.name))
     || all.find(v => v.lang === 'en-US')
     || all.find(v => v.lang.startsWith('en'));
-}
-
-function simulatePlay() {
-  const btn = document.getElementById('play-btn');
-  if (!btn) return;
-  if (!window.speechSynthesis) { showToast('TTS not supported in this browser'); return; }
-
-  window.speechSynthesis.cancel();
-  const s = state.todaySentences[state.currentSentenceIdx];
-  if (!s) return;
-
-  /* Refresh voice list (needed on some browsers) */
-  _loadVoices();
-
-  const utt = new SpeechSynthesisUtterance(s.text);
-  utt.lang = 'en-US';
-  utt.rate = 0.85;
-  utt.pitch = 1.0;
-  const voice = _pickVoice();
-  if (voice) utt.voice = voice;
-
-  btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;flex-shrink:0;"></div> Playing...';
-  btn.disabled = true;
-
-  utt.onend = () => {
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Hear native';
-    btn.disabled = false;
-  };
-  utt.onerror = (e) => {
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Hear native';
-    btn.disabled = false;
-  };
-
-  /* iOS Safari requires speak() called directly in gesture handler — no async gap */
-  window.speechSynthesis.speak(utt);
-
-  /* Chrome long-text stall workaround */
-  const stallCheck = setInterval(() => {
-    if (!window.speechSynthesis.speaking) { clearInterval(stallCheck); return; }
-    if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-  }, 5000);
-}
-
-async function toggleRecord() {
-  const btn = document.getElementById('rec-btn');
-  if (!btn) return;
-
-  if (!isRecording) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        stream.getTracks().forEach(t => t.stop());
-        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Play back`;
-        btn.className = 'aud-btn green';
-        btn.onclick = playback;
-        isRecording = false;
-      };
-      mediaRecorder.start();
-      isRecording = true;
-      btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;border-top-color:#D85A30;"></div> Stop';
-      btn.className = 'aud-btn rec';
-    } catch(e) {
-      showToast('Microphone access denied');
-    }
-  } else {
-    mediaRecorder.stop();
-  }
-}
-
-function playback() {
-  if (!recordedBlob) return;
-  const url = URL.createObjectURL(recordedBlob);
-  const audio = new Audio(url);
-  audio.play();
-  const btn = document.getElementById('rec-btn');
-  if (btn) { btn.innerHTML = '▶ Playing...'; setTimeout(() => { btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg> Play back'; }, 3000); }
 }
 
 // =====================
